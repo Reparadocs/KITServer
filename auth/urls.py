@@ -7,7 +7,7 @@ from . import views
 urlpatterns = [
     url(r'^facebook/', views.FacebookLogin.as_view(), name='facebook'),
     url(r'^create/', views.CreateUser.as_view(), name='create'),
-    url(r'^login/', authviews.obtain_auth_token),
+    url(r'^login/', views.LoginUser.as_view(), name='login'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
