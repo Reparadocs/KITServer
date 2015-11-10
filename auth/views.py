@@ -20,9 +20,12 @@ class FacebookLogin(APIView):
 			facebook = OpenFacebook(access_token)
 			try:
 				user = User.objects.get(username=facebook.get('me')['id'])
+				user.last_name = serializer.data['access_token']
+				user.save()
 			except ObjectDoesNotExist:
 				user = User.objects.create_user(facebook.get('me')['id'])
 				user.first_name = 'facebook'
+				user.last_name = serializer.data['access_token']
 				user.save()
 			token = Token.objects.get_or_create(user=user)
 			return Response({'token': token[0].key})
