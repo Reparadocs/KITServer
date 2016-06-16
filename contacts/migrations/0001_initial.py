@@ -17,10 +17,11 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=100)),
-                ('phone', models.CharField(max_length=100)),
-                ('email', models.CharField(max_length=100)),
+                ('phone', models.CharField(max_length=100, blank=True)),
+                ('email', models.CharField(max_length=100, blank=True)),
                 ('reminder', models.IntegerField()),
-                ('owner', models.ForeignKey(related_name='owner', to=settings.AUTH_USER_MODEL)),
+                ('last', models.DateTimeField(auto_now_add=True)),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

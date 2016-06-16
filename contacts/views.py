@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from models import Contact
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
+from django.utils import timezone
+import operator
 
 class CreateContact(APIView):
 	authentication_classes = (TokenAuthentication, SessionAuthentication)
@@ -53,6 +55,29 @@ class EditContact(APIView):
 			return Response({'success': True})
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class RefreshContact(APIView):
+	authentication_classes = (TokenAuthentication, SessionAuthentication)
+	permission_classes = (IsAuthenticated,)
+
+	def get_object(self, request, pk):
+		try:
+			contact = Contact.objects.get(pk=pk)
+			if contact.owner == request.user:
+				return contact
+			else:
+				return None
+		except Contact.DoesNotExist:
+			raise Http404
+
+	def get(self, request, pk, format=None):
+		contact = self.get_object(request, pk)
+		if not contact:
+			return Response('Not Owner', status=status.HTTP_400_BAD_REQUEST)
+		serializer = ContactSerializer(data=request.data)
+		contact.last = timezone.now()
+		contact.save()
+		return Response({'success': True})
+
 class DeleteContact(APIView):
 	authentication_classes = (TokenAuthentication, SessionAuthentication)
 	permission_classes = (IsAuthenticated,)
@@ -79,5 +104,9 @@ class ContactList(APIView):
 	permission_classes = (IsAuthenticated,)
 
 	def get(self, request, format=None):
+		current = timezone.now()
 		contacts = request.user.contact_set.all()
+		for contact in contacts:
+			contact.interval = (current - contact.last).days
+		contacts = sorted(contacts, key=operator.attrgetter('interval'))
 		return Response(ContactListSerializer(contacts, many=True).data)

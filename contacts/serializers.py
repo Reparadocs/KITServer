@@ -12,3 +12,4 @@ class ContactListSerializer(serializers.Serializer):
 	phone = serializers.CharField(max_length=100, allow_blank=True)
 	email = serializers.CharField(max_length=100, allow_blank=True)
 	reminder = serializers.IntegerField()
+	interval = serializers.IntegerField()
